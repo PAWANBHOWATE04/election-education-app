@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Election Process Education Assistant</title>
+  <meta name="description" content="An interactive, single-page education assistant designed to help voters understand the election process, deadlines, and core concepts through interactive guides, a quiz, search, and a mock voting simulator.">
+  
+  <!-- Tailwind CSS Play CDN (v3) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Outfit (headings) & Inter (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f3ff',
+              100: '#e1e7ff',
+              200: '#c8d3ff',
+              300: '#a3b4ff',
+              400: '#798eff',
+              500: '#4f5eff',
+              600: '#383fff',
+              700: '#2729eb',
+              800: '#1f20be',
+              900: '#1e2197',
+              950: '#111258',
+            },
+            accent: {
+              violet: '#8b5cf6',
+              emerald: '#10b981',
+              rose: '#f43f5e',
+              amber: '#f59e0b',
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'shake': 'shake 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'fade-in': 'fadeIn 0.3s ease-out forwards',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            shake: {
+              '0%, 100%': { transform: 'translateX(0)' },
+              '25%': { transform: 'translateX(-4px)' },
+              '75%': { transform: 'translateX(4px)' },
+            },
+            slideUp: {
+              '0%': { opacity: '0', transform: 'translateY(15px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style type="text/css">
+    /* Custom Scrollbar for premium dark theme */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* Glassmorphism utility classes */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .glass-card-hover:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+      background: rgba(15, 23, 42, 0.8);
+      box-shadow: 0 10px 30px -10px rgba(79, 94, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    /* Styled Highlights for Search Matches */
+    .search-highlight {
+      background: rgba(79, 94, 255, 0.25);
+      border-bottom: 2px solid #4f5eff;
+      color: #a3b4ff;
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+
+    /* Stepper custom animations */
+    .step-line-fill {
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Ballot slot transition */
+    .ballot-slip-anim {
+      animation: dropBallot 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+
+    @keyframes dropBallot {
+      0% {
+        transform: translateY(-120px) scale(1.05);
+        opacity: 0;
+      }
+      20% {
+        opacity: 1;
+        transform: translateY(-60px) scale(1);
+      }
+      70% {
+        opacity: 0.9;
+        transform: translateY(10px) scale(0.9);
+        filter: blur(0px);
+      }
+      100% {
+        transform: translateY(110px) scale(0.7);
+        opacity: 0;
+        filter: blur(4px);
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#0b0f19] text-slate-100 font-sans min-h-screen relative overflow-x-hidden selection:bg-brand-500/30 selection:text-brand-300">
+
+  <!-- Aesthetic background glow decorations -->
+  <div class="absolute top-0 left-1/4 w-[40rem] h-[40rem] bg-brand-900/10 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 -translate-x-1/2"></div>
+  <div class="absolute top-1/3 right-10 w-[35rem] h-[35rem] bg-accent-violet/10 rounded-full blur-[100px] pointer-events-none"></div>
+  <div class="absolute bottom-10 left-10 w-[35rem] h-[35rem] bg-accent-emerald/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+  <!-- Header / Navigation -->
+  <header class="sticky top-0 z-40 w-full glass-panel border-b border-slate-800/80 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <!-- Logo & Title -->
+      <a href="#" class="flex items-center space-x-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-violet flex items-center justify-center shadow-lg shadow-brand-500/20 group-hover:scale-105 transition-transform">
+          <!-- Logo Icon: Ballot Box / Checkmark -->
+          <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-display font-bold text-xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-brand-300 bg-clip-text text-transparent">
+            DemocracyHub
+          </h1>
+          <p class="text-xs text-slate-400 font-medium tracking-wider uppercase">Election Assistant</p>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center space-x-8">
+        <a href="#stepper-section" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Voter Journey</a>
+        <a href="#countdown-section" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Deadlines</a>
+        <a href="#quiz-section" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Awareness Quiz</a>
+        <a href="#faq-section" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">FAQ</a>
+        <a href="#simulator-section" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Voting Simulator</a>
+      </nav>
+
+      <!-- CTA Button -->
+      <div class="flex items-center space-x-4">
+        <a href="#quiz-section" class="relative group hidden sm:inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden text-xs font-semibold rounded-lg group bg-gradient-to-br from-brand-500 to-accent-violet group-hover:from-brand-500 group-hover:to-accent-violet hover:text-white text-white focus:ring-4 focus:outline-none focus:ring-brand-800 transition-all mt-2">
+          <span class="relative px-4 py-2 transition-all ease-in duration-75 bg-[#0f172a] rounded-md group-hover:bg-opacity-0">
+            Test Your Knowledge
+          </span>
+        </a>
+        
+        <!-- Mobile Navigation Menu Toggle -->
+        <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg border border-slate-800 text-slate-400 hover:text-white focus:outline-none" aria-label="Toggle navigation menu">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-[#0c101c]/95 backdrop-blur-lg px-4 py-4 space-y-3">
+      <a href="#stepper-section" class="block text-slate-300 hover:text-white font-medium py-2">Voter Journey</a>
+      <a href="#countdown-section" class="block text-slate-300 hover:text-white font-medium py-2">Deadlines</a>
+      <a href="#quiz-section" class="block text-slate-300 hover:text-white font-medium py-2">Awareness Quiz</a>
+      <a href="#faq-section" class="block text-slate-300 hover:text-white font-medium py-2">FAQ</a>
+      <a href="#simulator-section" class="block text-slate-300 hover:text-white font-medium py-2">Voting Simulator</a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative pt-12 pb-16 md:pt-20 md:pb-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center overflow-hidden">
+    <div class="relative z-10 max-w-3xl mx-auto">
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-300 border border-brand-500/20 mb-6 animate-pulse-slow">
+        <span class="w-2 h-2 rounded-full bg-brand-500 mr-2"></span>
+        Civic Education & Engagement Portal
+      </span>
+      <h2 class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-white mb-6 leading-tight">
+        Master the Art of <br>
+        <span class="bg-gradient-to-r from-brand-400 via-accent-violet to-brand-300 bg-clip-text text-transparent">Democratic Participation</span>
+      </h2>
+      <p class="text-base sm:text-lg text-slate-400 font-normal leading-relaxed mb-8">
+        Democracy thrives when voters are informed. Explore our interactive journey stepper, track upcoming timelines, test your knowledge, search our secure database, and experience casting a vote in our real-time simulated ballot box.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+        <a href="#stepper-section" class="w-full sm:w-auto px-8 py-4 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl shadow-lg shadow-brand-600/20 hover:shadow-brand-600/30 hover:-translate-y-0.5 transition-all text-center">
+          Begin Your Journey
+        </a>
+        <a href="#simulator-section" class="w-full sm:w-auto px-8 py-4 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white font-semibold rounded-xl transition-all text-center">
+          Try Mock Voting
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Modules Grid -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 space-y-28">
+
+    <!-- MODULE 1: Interactive Voter Journey Stepper -->
+    <section id="stepper-section" class="scroll-mt-24">
+      <div class="mb-10 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h3 class="font-display font-bold text-3xl text-white">Interactive Voter Journey</h3>
+          <p class="text-slate-400 mt-2">A step-by-step roadmap guiding you from initial registration to final result declaration.</p>
+        </div>
+        <div class="flex items-center justify-center space-x-3 bg-slate-900/50 p-2 rounded-xl border border-slate-800">
+          <span class="text-sm font-semibold text-slate-400 px-3">Journey Status:</span>
+          <span id="journey-completion-badge" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-accent-amber/15 text-accent-amber border border-accent-amber/30">
+            0/6 Steps Ready
+          </span>
+        </div>
+      </div>
+
+      <!-- Stepper Container -->
+      <div class="glass-panel rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl relative overflow-hidden">
+        <!-- Visual Progress Tracker -->
+        <div class="relative mb-12 mt-4 px-4 sm:px-8">
+          <!-- Desktop Horizontal Line -->
+          <div class="hidden md:block absolute top-1/2 left-0 w-full h-[3px] bg-slate-800 -translate-y-1/2 rounded-full overflow-hidden">
+            <div id="desktop-progress-line" class="step-line-fill h-full bg-gradient-to-r from-brand-600 to-accent-violet w-[0%]"></div>
+          </div>
+
+          <!-- Horizontal Steps -->
+          <div class="relative flex flex-col md:flex-row items-center justify-between gap-6 md:gap-0 z-10">
+            <!-- Step 1 Button -->
+            <button onclick="setJourneyStep(0)" class="stepper-node-btn flex md:flex-col items-center gap-4 md:gap-2 group focus:outline-none w-full md:w-auto text-left md:text-center">
+              <div class="stepper-node-icon w-12 h-12 rounded-2xl bg-brand-600 border-2 border-brand-400 text-white flex items-center justify-center font-display font-extrabold text-lg shadow-lg shadow-brand-500/20 transition-all duration-300">
+                1
+              </div>
+              <div>
+                <span class="stepper-node-title block text-xs font-semibold tracking-wider text-slate-400 uppercase group-hover:text-brand-300">Stage 1</span>
+                <span class="block text-sm font-bold text-white leading-tight">Registration</span>
+              </div>
+            </button>
+
+            <!-- Step 2 Button -->
+            <button onclick="setJourneyStep(1)" class="stepper-node-btn flex md:flex-col items-center gap-4 md:gap-2 group focus:outline-none w-full md:w-auto text-left md:text-center">
+              <div class="stepper-node-icon w-12 h-12 rounded-2xl bg-slate-900 border-2 border-slate-800 text-slate-500 flex items-center justify-center font-display font-extrabold text-lg transition-all duration-300">
+                2
+              </div>
+              <div>
+                <span class="stepper-node-title block text-xs font-semibold tracking-wider text-slate-400 uppercase group-hover:text-slate-300">Stage 2</span>
+                <span class="block text-sm font-bold text-slate-400 leading-tight">Research</span>
+              </div>
+            </button>
+
+            <!-- Step 3 Button -->
+            <button onclick="setJourneyStep(2)" class="stepper-node-btn flex md:flex-col items-center gap-4 md:gap-2 group focus:outline-none w-full md:w-auto text-left md:text-center">
+              <div class="stepper-node-icon w-12 h-12 rounded-2xl bg-slate-900 border-2 border-slate-800 text-slate-500 flex items-center justify-center font-display font-extrabold text-lg transition-all duration-300">
+                3
+              </div>
+              <div>
+                <span class="stepper-node-title block text-xs font-semibold tracking-wider text-slate-400 uppercase group-hover:text-slate-300">Stage 3</span>
+                <span class="block text-sm font-bold text-slate-400 leading-tight">Preparation</span>
+              </div>
+            </button>
+
+            <!-- Step 4 Button -->
+            <button onclick="setJourneyStep(3)" class="stepper-node-btn flex md:flex-col items-center gap-4 md:gap-2 group focus:outline-none w-full md:w-auto text-left md:text-center">
+              <div class="stepper-node-icon w-12 h-12 rounded-2xl bg-slate-900 border-2 border-slate-800 text-slate-500 flex items-center justify-center font-display font-extrabold text-lg transition-all duration-300">
+                4
+              </div>
+              <div>
+                <span class="stepper-node-title block text-xs font-semibold tracking-wider text-slate-400 uppercase group-hover:text-slate-300">Stage 4</span>
+                <span class="block text-sm font-bold text-slate-400 leading-tight">Polling Day</span>
+              </div>
+            </button>
+
+            <!-- Step 5 Button -->
+            <button onclick="setJourneyStep(4)" class="stepper-node-btn flex md:flex-col items-center gap-4 md:gap-2 group focus:outline-none w-full md:w-auto text-left md:text-center">
+              <div class="stepper-node-icon w-12 h-12 rounded-2xl bg-slate-900 border-2 border-slate-800 text-slate-500 flex items-center justify-center font-display font-extrabold text-lg transition-all duration-300">
+                5
+              </div>
+              <div>
+                <span class="stepper-node-title block text-xs font-semibold tracking-wider text-slate-400 uppercase group-hover:text-slate-300">Stage 5</span>
+                <span class="block text-sm font-bold text-slate-400 leading-tight">Casting Ballot</span>
+              </div>
+            </button>
+
+            <!-- Step 6 Button -->
+            <button onclick="setJourneyStep(5)" class="stepper-node-btn flex md:flex-col items-center gap-4 md:gap-2 group focus:outline-none w-full md:w-auto text-left md:text-center">
+              <div class="stepper-node-icon w-12 h-12 rounded-2xl bg-slate-900 border-2 border-slate-800 text-slate-500 flex items-center justify-center font-display font-extrabold text-lg transition-all duration-300">
+                6
+              </div>
+              <div>
+                <span class="stepper-node-title block text-xs font-semibold tracking-wider text-slate-400 uppercase group-hover:text-slate-300">Stage 6</span>
+                <span class="block text-sm font-bold text-slate-400 leading-tight">Results</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Detail Content Box (Dynamic rendering) -->
+        <div id="step-detail-card" class="bg-[#0f1524]/60 border border-slate-800/80 rounded-2xl p-6 sm:p-8 animate-fade-in">
+          <!-- Card Header & Metadata -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between border-b border-slate-800 pb-6 mb-6 gap-4">
+            <div class="flex items-center space-x-4">
+              <div id="step-badge-icon" class="w-14 h-14 rounded-2xl bg-brand-500/10 text-brand-400 flex items-center justify-center border border-brand-500/20">
+                <!-- Dynamic SVG will be injected here -->
+              </div>
+              <div>
+                <span id="step-stage-label" class="text-xs font-bold text-brand-400 uppercase tracking-widest">Stage 1 of 6</span>
+                <h4 id="step-stage-title" class="font-display font-bold text-2xl text-white">Voter Registration</h4>
+              </div>
+            </div>
+            <div class="flex items-center space-x-3">
+              <span id="step-card-status" class="px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                Unprepared
+              </span>
+            </div>
+          </div>
+
+          <!-- Description and Sub-task checklist grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="lg:col-span-7 space-y-6">
+              <p id="step-stage-description" class="text-slate-300 text-base leading-relaxed">
+                Voter registration is the essential first step in exercising your democratic rights. In this phase, you must verify your eligibility, prepare required proof of identity and residence, and submit your registration details online or through paper forms.
+              </p>
+              
+              <div class="bg-slate-900/40 rounded-xl p-5 border border-slate-800/60">
+                <h5 class="font-semibold text-white text-sm mb-3 flex items-center">
+                  <svg class="w-4 h-4 text-brand-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Pro-Tip for Citizens
+                </h5>
+                <p id="step-stage-tip" class="text-xs text-slate-400 leading-relaxed">
+                  Always register well ahead of time. Many jurisdictions enforce a voter cutoff date generally 15-30 days before Election Day. Make sure to double-check spelling of your address on your submitted forms.
+                </p>
+              </div>
+            </div>
+
+            <!-- Interactivity Checklist -->
+            <div class="lg:col-span-5 border border-slate-800 bg-slate-900/30 p-6 rounded-2xl space-y-4">
+              <div>
+                <h5 class="font-display font-bold text-white text-base">Your Checklist Checklist</h5>
+                <p class="text-xs text-slate-400 mt-1">Complete these tasks to mark this stage as "Ready".</p>
+              </div>
+
+              <div id="step-checklist-container" class="space-y-3">
+                <!-- Checkboxes will be dynamically rendered here -->
+              </div>
+
+              <!-- Interactive State Bar -->
+              <div class="pt-4 border-t border-slate-800">
+                <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-1.5">
+                  <span>Stage Preparation Progress</span>
+                  <span id="step-completion-percentage" class="text-brand-300">0%</span>
+                </div>
+                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                  <div id="step-completion-bar" class="bg-gradient-to-r from-brand-500 to-accent-violet h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nav Buttons inside Detail Card -->
+          <div class="flex items-center justify-between mt-8 pt-6 border-t border-slate-800/80">
+            <button id="step-prev-btn" onclick="journeyPrev()" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+              Previous Stage
+            </button>
+            <button id="step-next-btn" onclick="journeyNext()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-brand-500/10 hover:shadow-brand-500/20 transition-all flex items-center gap-2">
+              Next Stage
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 2: Election Deadlines Tracker with Live Countdown -->
+    <section id="countdown-section" class="scroll-mt-24">
+      <div class="mb-10 text-center">
+        <h3 class="font-display font-bold text-3xl text-white">Election Deadlines Tracker</h3>
+        <p class="text-slate-400 mt-2 max-w-2xl mx-auto">Don't miss critical milestones. Select a key phase below to activate the live countdown timer.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <!-- Input panel and Milestone Selector -->
+        <div class="lg:col-span-5 glass-panel rounded-3xl p-6 sm:p-8 flex flex-col justify-between shadow-xl">
+          <div class="space-y-6">
+            <div>
+              <label for="milestone-selector" class="block text-sm font-semibold text-slate-300 mb-2">Select Milestone Event</label>
+              <div class="relative">
+                <select id="milestone-selector" onchange="changeMilestone()" class="w-full bg-[#0a0e1a] border border-slate-700/60 rounded-xl px-4 py-3 text-slate-100 font-semibold focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all appearance-none cursor-pointer">
+                  <!-- JS will dynamically populate milestones, or hardcode them with values -->
+                  <option value="reg" selected>Voter Registration Deadline</option>
+                  <option value="mail">Mail-in Ballot Application Deadline</option>
+                  <option value="eday">National Election Day</option>
+                  <option value="cert">Official Results Certification</option>
+                </select>
+                <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Milestone Information -->
+            <div id="milestone-info-box" class="bg-slate-900/60 rounded-2xl p-5 border border-slate-800/80 space-y-3">
+              <span id="milestone-info-badge" class="px-2.5 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase bg-brand-500/10 text-brand-300 border border-brand-500/20">
+                Key Milestone
+              </span>
+              <h4 id="milestone-info-title" class="font-display font-bold text-lg text-white">Voter Registration Cutoff</h4>
+              <p id="milestone-info-desc" class="text-xs text-slate-400 leading-relaxed">
+                The absolute final day to submit your voter registration form to be eligible for the upcoming elections. Registration received after this date will be rolled over to the next electoral cycle.
+              </p>
+              <div class="flex items-center text-xs text-slate-300 font-medium">
+                <svg class="w-4 h-4 text-brand-400 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Target Date: <span id="milestone-target-date" class="text-brand-300 ml-1">October 12, 2026</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-6 border-t border-slate-800">
+            <div class="flex items-center space-x-3 text-xs text-slate-400">
+              <svg class="w-4 h-4 text-accent-rose animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>Verify registration cutoff deadlines in your specific municipality.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Countdown Live Visual Counter Cards -->
+        <div class="lg:col-span-7 bg-slate-950/40 rounded-3xl border border-slate-800 p-6 sm:p-10 flex flex-col justify-center items-center relative overflow-hidden shadow-2xl">
+          <div class="absolute inset-0 bg-gradient-to-br from-brand-600/5 via-transparent to-accent-violet/5"></div>
+          
+          <div class="relative z-10 text-center w-full">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Time remaining until deadline</h4>
+
+            <!-- Grid of 4 Timer Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-lg mx-auto mb-8">
+              <!-- Days -->
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col items-center justify-center min-w-[5rem] shadow-xl">
+                <span id="countdown-days" class="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-brand-400 tracking-tight">00</span>
+                <span class="text-xs font-medium text-slate-400 mt-2 uppercase tracking-wide">Days</span>
+              </div>
+              <!-- Hours -->
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col items-center justify-center min-w-[5rem] shadow-xl">
+                <span id="countdown-hours" class="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight">00</span>
+                <span class="text-xs font-medium text-slate-400 mt-2 uppercase tracking-wide">Hours</span>
+              </div>
+              <!-- Minutes -->
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col items-center justify-center min-w-[5rem] shadow-xl">
+                <span id="countdown-minutes" class="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight">00</span>
+                <span class="text-xs font-medium text-slate-400 mt-2 uppercase tracking-wide">Minutes</span>
+              </div>
+              <!-- Seconds -->
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col items-center justify-center min-w-[5rem] shadow-xl">
+                <span id="countdown-seconds" class="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-accent-rose tracking-tight">00</span>
+                <span class="text-xs font-medium text-slate-400 mt-2 uppercase tracking-wide">Seconds</span>
+              </div>
+            </div>
+
+            <!-- Active Status Tally Banner -->
+            <div id="countdown-active-banner" class="inline-flex items-center px-4 py-2 rounded-xl bg-accent-emerald/10 text-accent-emerald border border-accent-emerald/20 text-sm font-semibold">
+              <span class="w-2.5 h-2.5 rounded-full bg-accent-emerald animate-ping mr-2.5"></span>
+              Live Counter Active & Running
+            </div>
+            
+            <div id="countdown-passed-banner" class="hidden inline-flex items-center px-4 py-2 rounded-xl bg-accent-rose/10 text-accent-rose border border-accent-rose/20 text-sm font-semibold">
+              <span class="w-2.5 h-2.5 rounded-full bg-accent-rose mr-2.5"></span>
+              Deadline Has Passed
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 3: Interactive 10-Question Voter Awareness Quiz -->
+    <section id="quiz-section" class="scroll-mt-24">
+      <div class="mb-10 text-center">
+        <h3 class="font-display font-bold text-3xl text-white">Voter Awareness Quiz</h3>
+        <p class="text-slate-400 mt-2 max-w-2xl mx-auto">Test your knowledge on democratic rules, voter rights, and basic structures of representation.</p>
+      </div>
+
+      <!-- Quiz Main Card -->
+      <div class="max-w-3xl mx-auto glass-panel rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl relative overflow-hidden">
+        <!-- Grid overlay pattern -->
+        <div class="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+
+        <!-- Canvas for Confetti shower celebration -->
+        <canvas id="quiz-confetti-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-20"></canvas>
+
+        <!-- Quiz Initial State Card -->
+        <div id="quiz-start-state" class="text-center py-8 relative z-10">
+          <div class="w-20 h-20 rounded-3xl bg-brand-500/10 text-brand-400 flex items-center justify-center border border-brand-500/20 mx-auto mb-6">
+            <!-- Quiz Icon -->
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h4 class="font-display font-bold text-2xl text-white">Are You Ready to Vote?</h4>
+          <p class="text-slate-400 max-w-md mx-auto mt-3 mb-8">
+            This interactive, non-partisan diagnostic contains 10 key questions regarding civic systems, voter ID mandates, ballot guidelines, and electoral rules.
+          </p>
+          <button onclick="startQuiz()" class="px-8 py-4 bg-gradient-to-r from-brand-600 to-accent-violet hover:from-brand-500 hover:to-accent-violet text-white font-semibold rounded-xl shadow-lg shadow-brand-500/20 hover:scale-[1.02] transition-all">
+            Begin Quiz Challenge
+          </button>
+        </div>
+
+        <!-- Quiz Active Play State -->
+        <div id="quiz-active-state" class="hidden relative z-10">
+          <!-- Quiz Progress Indicator -->
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-5 mb-6">
+            <span class="text-xs font-bold text-brand-400 uppercase tracking-widest" id="quiz-progress-text">Question 1 of 10</span>
+            <span class="px-2.5 py-0.5 rounded text-xs font-bold bg-slate-900 text-slate-400 border border-slate-800" id="quiz-score-badge">Score: 0/10</span>
+          </div>
+
+          <!-- Progress Bar Indicator -->
+          <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-8">
+            <div id="quiz-progress-bar" class="h-full bg-gradient-to-r from-brand-600 to-accent-violet rounded-full transition-all duration-300" style="width: 10%"></div>
+          </div>
+
+          <!-- Question Prompt -->
+          <h4 id="quiz-question-text" class="font-display font-bold text-lg sm:text-xl text-white mb-6">
+            Loading question text here...
+          </h4>
+
+          <!-- Option Buttons Grid -->
+          <div id="quiz-options-container" class="grid grid-cols-1 gap-4 mb-6">
+            <!-- Dynamically populated buttons -->
+          </div>
+
+          <!-- Response Explanation Card (Hidden by default, shown on select) -->
+          <div id="quiz-explanation-card" class="hidden bg-slate-900/80 border rounded-2xl p-5 mb-6 transform scale-95 opacity-0 transition-all duration-300">
+            <div class="flex items-start space-x-3">
+              <div id="quiz-explanation-icon" class="mt-0.5 w-6 h-6 rounded-full flex items-center justify-center shrink-0">
+                <!-- Check or Cross Dynamic Icon -->
+              </div>
+              <div>
+                <h5 id="quiz-explanation-title" class="font-bold text-sm">Correct!</h5>
+                <p id="quiz-explanation-body" class="text-xs text-slate-400 leading-relaxed mt-1">
+                  Explanation body details...
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Bar (Submit / Next) -->
+          <div class="flex justify-end pt-4 border-t border-slate-800/80">
+            <button id="quiz-action-btn" onclick="nextQuizQuestion()" disabled class="px-6 py-3 bg-slate-800 text-slate-500 cursor-not-allowed font-semibold rounded-xl text-sm transition-all flex items-center gap-2">
+              Next Question
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quiz Completion / End State -->
+        <div id="quiz-end-state" class="hidden text-center py-6 relative z-10 animate-fade-in">
+          <div class="relative w-28 h-28 mx-auto mb-6">
+            <!-- Outer circular progress ring -->
+            <svg class="w-full h-full transform -rotate-90">
+              <circle cx="56" cy="56" r="48" stroke="#1e293b" stroke-width="8" fill="transparent" />
+              <circle id="quiz-result-ring" cx="56" cy="56" r="48" stroke="#4f5eff" stroke-width="8" fill="transparent" stroke-dasharray="301.6" stroke-dashoffset="301.6" class="transition-all duration-1000 ease-out" />
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span id="quiz-result-score" class="font-display font-extrabold text-3xl text-white">0%</span>
+              <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Score</span>
+            </div>
+          </div>
+
+          <h4 id="quiz-result-title" class="font-display font-bold text-2xl text-white">Civic Prodigy!</h4>
+          <p id="quiz-result-desc" class="text-slate-400 max-w-md mx-auto mt-2 mb-8 leading-relaxed">
+            Congratulations! You successfully completed the quiz. You have demonstrated a high level of electoral system knowledge.
+          </p>
+
+          <div class="bg-slate-900/50 max-w-md mx-auto p-4 rounded-xl border border-slate-800 flex justify-around mb-8">
+            <div>
+              <span class="block text-2xl font-bold text-brand-300" id="quiz-correct-count">0</span>
+              <span class="text-xs text-slate-400">Correct Answers</span>
+            </div>
+            <div class="border-r border-slate-800"></div>
+            <div>
+              <span class="block text-2xl font-bold text-accent-rose" id="quiz-incorrect-count">0</span>
+              <span class="text-xs text-slate-400">Incorrect Answers</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-center space-x-4">
+            <button onclick="resetQuiz()" class="px-6 py-3 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl text-sm transition-all">
+              Try Quiz Again
+            </button>
+            <a href="#stepper-section" class="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 rounded-xl text-sm font-semibold transition-all">
+              Review Voter Journey
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 4: Searchable FAQ Knowledge Base -->
+    <section id="faq-section" class="scroll-mt-24">
+      <div class="mb-10 text-center">
+        <h3 class="font-display font-bold text-3xl text-white">FAQ Knowledge Base</h3>
+        <p class="text-slate-400 mt-2 max-w-2xl mx-auto">Get answers to critical inquiries instantly. Filter by category or search with matching keyword highlighting.</p>
+      </div>
+
+      <!-- FAQ Container -->
+      <div class="max-w-4xl mx-auto space-y-6">
+        <!-- Search Bar and Category Tabs Grid -->
+        <div class="glass-panel p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
+          <!-- Search Bar Input -->
+          <div class="relative">
+            <input type="text" id="faq-search-input" onkeyup="filterFAQs()" placeholder="Search terms (e.g. registration, ID, voting place)..." class="w-full bg-[#0a0e1a] border border-slate-700/60 rounded-2xl pl-12 pr-4 py-4 text-slate-100 placeholder-slate-500 font-medium focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all">
+            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-500">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <!-- Clear search button -->
+            <button id="faq-clear-btn" onclick="clearFAQSearch()" class="hidden absolute inset-y-0 right-4 items-center text-slate-500 hover:text-white">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Category filter tabs -->
+          <div class="flex flex-wrap gap-2 pt-2">
+            <button onclick="filterFAQCategory('all')" id="faq-tab-all" class="faq-category-btn px-4 py-2 rounded-xl text-xs font-semibold border border-brand-500 bg-brand-500/10 text-brand-300 transition-all">
+              All FAQs
+            </button>
+            <button onclick="filterFAQCategory('reg')" id="faq-tab-reg" class="faq-category-btn px-4 py-2 rounded-xl text-xs font-semibold border border-slate-800 bg-slate-900/40 text-slate-400 hover:text-white transition-all">
+              Registration
+            </button>
+            <button onclick="filterFAQCategory('process')" id="faq-tab-process" class="faq-category-btn px-4 py-2 rounded-xl text-xs font-semibold border border-slate-800 bg-slate-900/40 text-slate-400 hover:text-white transition-all">
+              Voting Process
+            </button>
+            <button onclick="filterFAQCategory('security')" id="faq-tab-security" class="faq-category-btn px-4 py-2 rounded-xl text-xs font-semibold border border-slate-800 bg-slate-900/40 text-slate-400 hover:text-white transition-all">
+              Security & Rights
+            </button>
+          </div>
+        </div>
+
+        <!-- FAQ Accordion List -->
+        <div id="faq-accordion-container" class="space-y-4">
+          <!-- Accordion elements will be dynamically generated by JS -->
+        </div>
+
+        <!-- No Results state -->
+        <div id="faq-no-results" class="hidden text-center py-12 bg-slate-900/20 border border-slate-800 rounded-3xl">
+          <div class="w-16 h-16 rounded-2xl bg-slate-900 text-slate-500 flex items-center justify-center border border-slate-800 mx-auto mb-4">
+            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h4 class="font-display font-bold text-white text-lg">No Matching FAQs Found</h4>
+          <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">We couldn't find any questions matching your query. Try searching with different keywords like "voter ID" or "register".</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 5: Mock Voting Simulator -->
+    <section id="simulator-section" class="scroll-mt-24">
+      <div class="mb-10 text-center">
+        <h3 class="font-display font-bold text-3xl text-white">Interactive Mock Voting Simulator</h3>
+        <p class="text-slate-400 mt-2 max-w-2xl mx-auto">Experience casting a ballot firsthand. Cast mock votes to see how percentages, visual counts, and tallies aggregate instantly.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <!-- Left Panel: Ballot & Candidates selection -->
+        <div class="lg:col-span-7 glass-panel rounded-3xl p-6 sm:p-8 flex flex-col justify-between shadow-xl relative overflow-hidden">
+          <!-- Small Slot Box for ballot slip animation -->
+          <div class="absolute inset-x-0 top-0 h-28 pointer-events-none z-20 flex justify-center items-start overflow-hidden">
+            <div id="visual-ballot-slot" class="hidden ballot-slip-anim w-64 bg-slate-900 border-2 border-brand-500/80 rounded-xl p-4 shadow-2xl relative flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 flex items-center justify-center shrink-0 border border-brand-500/20">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div class="text-left">
+                <span class="block text-[10px] font-bold text-brand-400 uppercase tracking-wide">Ballot Cast</span>
+                <span id="visual-ballot-candidate" class="block text-xs font-bold text-white truncate">Ava Sterling</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Mock Electoral Ballot</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-accent-rose/10 text-accent-rose border border-accent-rose/20">
+                Demonstration Only
+              </span>
+            </div>
+
+            <!-- Ballot Description -->
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Below are three educational candidates representing neutral policy visions. Click the button to cast a mock vote for your preferred candidate, and watch the ballot enter the digital tally system.
+            </p>
+
+            <!-- Candidates Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <!-- Candidate A Card -->
+              <div id="sim-card-0" class="bg-[#0c101c]/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between items-center text-center shadow-lg relative group transition-all duration-300">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-accent-violet to-purple-600 flex items-center justify-center text-white font-extrabold text-sm mb-4 shadow-lg group-hover:scale-105 transition-transform">
+                  AV
+                </div>
+                <div>
+                  <h4 class="font-display font-bold text-sm text-white">Ava Sterling</h4>
+                  <span class="block text-[10px] font-semibold text-accent-violet mt-1">Green Coalition</span>
+                  <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">Carbon neutrality targets, expanded public transit, and smart urban ecosystems.</p>
+                </div>
+                <button onclick="castSimulatorVote(0)" class="w-full mt-5 px-3 py-2 bg-slate-900 border border-slate-800 hover:border-accent-violet hover:bg-accent-violet/10 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all">
+                  Cast Vote
+                </button>
+              </div>
+
+              <!-- Candidate B Card -->
+              <div id="sim-card-1" class="bg-[#0c101c]/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between items-center text-center shadow-lg relative group transition-all duration-300">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-brand-600 to-blue-600 flex items-center justify-center text-white font-extrabold text-sm mb-4 shadow-lg group-hover:scale-105 transition-transform">
+                  MC
+                </div>
+                <div>
+                  <h4 class="font-display font-bold text-sm text-white">Marcus Chen</h4>
+                  <span class="block text-[10px] font-semibold text-brand-400 mt-1">Innovation Party</span>
+                  <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">Advanced technology research grants, digital learning, and STEM support.</p>
+                </div>
+                <button onclick="castSimulatorVote(1)" class="w-full mt-5 px-3 py-2 bg-slate-900 border border-slate-800 hover:border-brand-500 hover:bg-brand-500/10 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all">
+                  Cast Vote
+                </button>
+              </div>
+
+              <!-- Candidate C Card -->
+              <div id="sim-card-2" class="bg-[#0c101c]/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between items-center text-center shadow-lg relative group transition-all duration-300">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-accent-emerald to-teal-600 flex items-center justify-center text-white font-extrabold text-sm mb-4 shadow-lg group-hover:scale-105 transition-transform">
+                  EV
+                </div>
+                <div>
+                  <h4 class="font-display font-bold text-sm text-white">Elena Vance</h4>
+                  <span class="block text-[10px] font-semibold text-accent-emerald mt-1">Heritage Alliance</span>
+                  <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">Cultural arts funding, civic awareness projects, and historical site preservation.</p>
+                </div>
+                <button onclick="castSimulatorVote(2)" class="w-full mt-5 px-3 py-2 bg-slate-900 border border-slate-800 hover:border-accent-emerald hover:bg-accent-emerald/10 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all">
+                  Cast Vote
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span class="text-xs text-slate-500">Each vote cast triggers a physical-like slip drops down into the electronic ledger slot.</span>
+            <button onclick="resetSimulator()" class="w-full sm:w-auto px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white text-xs font-semibold rounded-lg transition-all">
+              Reset Simulator Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Panel: Real-time vote counts & dashboards -->
+        <div class="lg:col-span-5 bg-slate-950/40 rounded-3xl border border-slate-800 p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative">
+          <div class="space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Real-time Vote Tally</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-accent-emerald/10 text-accent-emerald border border-accent-emerald/20 flex items-center">
+                <span class="w-1.5 h-1.5 rounded-full bg-accent-emerald mr-1.5 animate-pulse"></span> Live Count
+              </span>
+            </div>
+
+            <!-- Total Mock Ballots Cast counter card -->
+            <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 flex justify-between items-center">
+              <div>
+                <span class="block text-xs font-bold text-slate-400 uppercase">Total Mock Ballots</span>
+                <span id="sim-total-count" class="font-display font-extrabold text-3xl text-white mt-1 block">150</span>
+              </div>
+              <div class="w-12 h-12 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center border border-brand-500/20">
+                <!-- Ballot Box SVG icon -->
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Candidate Progress Bars -->
+            <div class="space-y-5">
+              <!-- Candidate A Tally -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-white">Ava Sterling <span class="font-medium text-slate-500 ml-1">(Green Coalition)</span></span>
+                  <span class="font-extrabold text-accent-violet" id="sim-cand0-percent">33.3%</span>
+                </div>
+                <div class="w-full bg-slate-900 h-3.5 rounded-full overflow-hidden border border-slate-800">
+                  <div id="sim-cand0-bar" class="bg-gradient-to-r from-accent-violet to-purple-500 h-full rounded-full transition-all duration-500" style="width: 33.3%"></div>
+                </div>
+                <div class="text-[10px] text-slate-500 text-right">
+                  Votes: <span id="sim-cand0-votes" class="font-bold text-slate-400">50</span>
+                </div>
+              </div>
+
+              <!-- Candidate B Tally -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-white">Marcus Chen <span class="font-medium text-slate-500 ml-1">(Innovation Party)</span></span>
+                  <span class="font-extrabold text-brand-400" id="sim-cand1-percent">33.3%</span>
+                </div>
+                <div class="w-full bg-slate-900 h-3.5 rounded-full overflow-hidden border border-slate-800">
+                  <div id="sim-cand1-bar" class="bg-gradient-to-r from-brand-600 to-blue-500 h-full rounded-full transition-all duration-500" style="width: 33.3%"></div>
+                </div>
+                <div class="text-[10px] text-slate-500 text-right">
+                  Votes: <span id="sim-cand1-votes" class="font-bold text-slate-400">50</span>
+                </div>
+              </div>
+
+              <!-- Candidate C Tally -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-white">Elena Vance <span class="font-medium text-slate-500 ml-1">(Heritage Alliance)</span></span>
+                  <span class="font-extrabold text-accent-emerald" id="sim-cand2-percent">33.3%</span>
+                </div>
+                <div class="w-full bg-slate-900 h-3.5 rounded-full overflow-hidden border border-slate-800">
+                  <div id="sim-cand2-bar" class="bg-gradient-to-r from-accent-emerald to-teal-500 h-full rounded-full transition-all duration-500" style="width: 33.3%"></div>
+                </div>
+                <div class="text-[10px] text-slate-500 text-right">
+                  Votes: <span id="sim-cand2-votes" class="font-bold text-slate-400">50</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6 border-t border-slate-900">
+            <div class="flex items-center space-x-3 bg-slate-900/40 p-4 rounded-xl border border-slate-800/80">
+              <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p class="text-[10px] text-slate-400 leading-normal">
+                This mock tally shows proportional math. Notice how casting votes shifts both individual candidate counts and percentage allocations dynamically.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="glass-panel border-t border-slate-800/80 pt-12 pb-8 mt-20 relative z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
+        <!-- Logo Column -->
+        <div class="md:col-span-5 space-y-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center shadow-lg">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
+            </div>
+            <span class="font-display font-bold text-lg text-white">DemocracyHub</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed max-w-sm">
+            DemocracyHub is an interactive, open-access education assistant designed to foster civic awareness, voter confidence, and democratic knowledge. Built with high-fidelity components to demonstrate real election mechanisms safely.
+          </p>
+        </div>
+
+        <!-- Links Column -->
+        <div class="md:col-span-4 space-y-3">
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider">Educational Resources</h4>
+          <ul class="space-y-2 text-xs text-slate-400">
+            <li><a href="https://www.vote.org" target="_blank" class="hover:text-brand-300 transition-colors">Vote.org - Official Registration Verification</a></li>
+            <li><a href="https://www.vote411.org" target="_blank" class="hover:text-brand-300 transition-colors">VOTE411 - Non-partisan Voter Information</a></li>
+            <li><a href="https://www.eac.gov" target="_blank" class="hover:text-brand-300 transition-colors">U.S. Election Assistance Commission</a></li>
+            <li><a href="https://www.lwv.org" target="_blank" class="hover:text-brand-300 transition-colors">League of Women Voters</a></li>
+          </ul>
+        </div>
+
+        <!-- Feedback Column -->
+        <div class="md:col-span-3 space-y-3">
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider">Assistance Hub</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">Have recommendations to make this portal even more helpful? Drop us a feedback check.</p>
+          <button onclick="alert('Thank you for your feedback interest! As this is an educational mock environment, your feedback would be logged inside our central simulator metrics in a live environment.')" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all">
+            Share Feedback
+          </button>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-800/80 pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+        <span>© 2026 DemocracyHub. Created for educational and demonstration purposes. No real personal details are processed.</span>
+        <div class="flex space-x-6">
+          <a href="#" class="hover:underline">Privacy Policy</a>
+          <a href="#" class="hover:underline">Terms of Use</a>
+          <a href="#" class="hover:underline">Contact Support</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Interaction Logic (Vanilla JS) -->
+  <script>
+    // ==========================================
+    // DATA DECLARATIONS
+    // ==========================================
+
+    // Journey Stepper Stages
+    const STEPPER_STAGES = [
+      {
+        index: 1,
+        title: "Voter Registration",
+        label: "Stage 1 of 6",
+        description: "Voter registration is the essential first step in exercising your democratic rights. In this phase, you must verify your eligibility, prepare required proof of identity and residence, and submit your registration details online or through paper forms.",
+        tip: "Always register well ahead of time. Many jurisdictions enforce a voter cutoff date generally 15-30 days before Election Day. Make sure to double-check spelling of your address on your submitted forms.",
+        icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>`,
+        checklist: [
+          "Check eligibility criteria (age, citizenship, residency)",
+          "Gather necessary identification (Drivers license, State ID, passport)",
+          "Complete the registration form (online portal or paper mail-in)",
+          "Verify spelling and secure a confirmation receipt"
+        ],
+        states: [false, false, false, false]
+      },
+      {
+        index: 2,
+        title: "Research & Education",
+        label: "Stage 2 of 6",
+        description: "An informed electorate drives healthy democracy. Dedicate time to research candidates, analyze their political platforms, scrutinize local ballot measures, and consult non-partisan voter guides to make unbiased selections.",
+        tip: "Avoid relying on a single news channel or social media platform. Look for non-partisan tools like Vote411.org or official municipal publications to read direct text on proposed ordinances.",
+        icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`,
+        checklist: [
+          "Locate non-partisan voter guides matching your zip code",
+          "Read candidate bios, platforms, and debate summaries",
+          "Analyze pros, cons, and financial impacts of local ballot initiatives",
+          "Establish personal priorities on core local/national topics"
+        ],
+        states: [false, false, false, false]
+      },
+      {
+        index: 3,
+        title: "Timeline & Preparation",
+        label: "Stage 3 of 6",
+        description: "Minimize friction on polling day by outlining a clear action plan. Confirm your designated voting site address, check hours of operations, and review acceptable forms of identity required by local regulations.",
+        tip: "Plan your transportation in advance and carve out a specific slot in your calendar. Polling stations are typically busiest early in the morning and immediately after standard work hours.",
+        icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>`,
+        checklist: [
+          "Check active voter registration status online to ensure active rolls",
+          "Confirm exact physical location of your designated polling site",
+          "Verify what specific photo/non-photo ID forms are accepted locally",
+          "Decide between in-person early voting, mail-in voting, or Election Day voting"
+        ],
+        states: [false, false, false, false]
+      },
+      {
+        index: 4,
+        title: "Polling Day Arrival",
+        label: "Stage 4 of 6",
+        description: "Arrive prepared at your designated polling location. Follow posted visual instructions, join the verification queue, and display your required identity documents to the volunteer clerk for verification.",
+        tip: "If you are in line before the official closing time of the polling station, do not leave. Legally, you must be permitted to remain in line and cast your ballot.",
+        icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>`,
+        checklist: [
+          "Arrive at the correct polling place within official operating hours",
+          "Bring your prepared identification card/documents",
+          "State your name and registered address clearly to the polling clerk",
+          "Sign the official voter pollbook as requested to receive your blank ballot"
+        ],
+        states: [false, false, false, false]
+      },
+      {
+        index: 5,
+        title: "Casting the Ballot",
+        label: "Stage 5 of 6",
+        description: "Proceed to a private booth to record your selections. Carefully mark your paper ballot or follow the instructions on the electronic voting terminal (EVM). Verify all selections before finalized submission.",
+        tip: "If you make an error on a paper ballot, don't worry. Do not cross it out. Bring it back to the election clerks and request a replacement. This is referred to as a 'spoiled ballot'.",
+        icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>`,
+        checklist: [
+          "Step into a private booth and read marking instructions",
+          "Select candidates and choices clearly using the provided tool",
+          "Review selections to ensure no accidental skipped fields",
+          "Deposit the paper ballot into the scanner/box or press final submit"
+        ],
+        states: [false, false, false, false]
+      },
+      {
+        index: 6,
+        title: "Result Declaration",
+        label: "Stage 6 of 6",
+        description: "The democratic cycle finishes with transparency. After polls officially close, election staff audit, scan, and tally all physical and electronic ballots. Unofficial results are displayed, followed by certifications.",
+        tip: "Election counts take time. Mail-in ballots, military envelopes, and provisional checks require meticulous validation. Trust official certified election boards rather than instant exit poll predictions.",
+        icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>`,
+        checklist: [
+          "Accept your official 'I Voted' digital or physical badge/ink mark",
+          "Observe official non-partisan election result trackers",
+          "Understand the auditing, counting, and provisional approval processes",
+          "Acknowledge verified certified outcomes once announced by the election board"
+        ],
+        states: [false, false, false, false]
+      }
+    ];
+
+    // Countdown Milestone Event targets
+    const MILESTONES = {
+      reg: {
+        title: "Voter Registration Cutoff",
+        desc: "The absolute final day to submit your voter registration form to be eligible for the upcoming general election. Registration received after this date will be rolled over to the next electoral cycle.",
+        target: "2026-10-12T23:59:59",
+        dateString: "October 12, 2026"
+      },
+      mail: {
+        title: "Mail-in Ballot Application",
+        desc: "The final day to request that an absentee or mail-in ballot package be shipped to your registered home address. Applications must be received by election offices before regional closing times.",
+        target: "2026-10-20T17:00:00",
+        dateString: "October 20, 2026"
+      },
+      eday: {
+        title: "National Election Day",
+        desc: "The core election day. Designated in-person polling locations across all precincts will be open. Casting of primary general ballots concludes as scheduled regional poll hours close.",
+        target: "2026-11-03T20:00:00",
+        dateString: "November 3, 2026"
+      },
+      cert: {
+        title: "Official Results Certification",
+        desc: "The official deadline by which electoral boards must fully process provisional ballots, audit discrepancies, recount razor-thin contests, and formally sign certifications of outcomes.",
+        target: "2026-11-15T18:00:00",
+        dateString: "November 15, 2026"
+      }
+    };
+
+    // Quiz Questions Data (10 fully realized questions)
+    const QUIZ_QUESTIONS = [
+      {
+        question: "What is the standard voting age required to register and cast a ballot in general federal elections?",
+        options: ["16 Years Old", "18 Years Old", "21 Years Old", "No Age Limit"],
+        correct: 1,
+        explanation: "In most representative systems, including the United States (via the 26th Amendment), the standard legal age to vote is 18 years old."
+      },
+      {
+        question: "Which of the following documents is generally NOT accepted as a strict primary photo identification (unless supplementary options apply)?",
+        options: ["U.S. Passport", "State Driver's License", "Standard Public Library Card", "Active Duty Military ID"],
+        correct: 2,
+        explanation: "While passports, drivers licenses, and military cards are government-issued photographic IDs, a public library card generally lacks federal security verification and is not accepted."
+      },
+      {
+        question: "What is the main purpose of a 'Primary Election' in democratic political systems?",
+        options: [
+          "To choose a party's presidential nominees and candidates for the general election.",
+          "To amend constitution bylaws instantly.",
+          "To count mail-in provisional tally totals ahead of time.",
+          "To register young first-time high school voters."
+        ],
+        correct: 0,
+        explanation: "Primary elections are nominating systems where members of a political party select their preferred candidate to represent the party on the general election ballot."
+      },
+      {
+        question: "If you make an error when hand-marking your paper ballot at the booth, what is the proper protocol to ensure your vote counts?",
+        options: [
+          "Cross out the incorrect option with a dark pen and check off the correct one.",
+          "Write a descriptive note to the counting officers directly on the margins.",
+          "Do nothing and deposit it anyway, expecting a machine to guess.",
+          "Return the ballot to election workers, have it marked 'Spoiled', and get a fresh replacement."
+        ],
+        correct: 3,
+        explanation: "If you make a mistake, return the ballot. Writing notes or scribbling errors can cause scanners to flag the ballot as invalid. Clerks will securely void (spoil) the ballot and issue a clean one."
+      },
+      {
+        question: "What does the process of 'Redistricting' refer to in election organization?",
+        options: [
+          "Moving physical ballot boxes to more secure vault storage sites.",
+          "Redrawing boundaries of electoral districts to match census population changes.",
+          "Allowing voters from one state to vote in adjacent regional systems.",
+          "Cancelling elections due to inclement weather conditions."
+        ],
+        correct: 1,
+        explanation: "Redistricting is the periodic process of redrawing boundaries of congressional, legislative, or local voting districts so that each district holds roughly equal population values."
+      },
+      {
+        question: "How can you legally verify that your voter registration is active and up to date?",
+        options: [
+          "By waiting to see if you receive a call from candidate fundraising groups.",
+          "By checking online through your official county or state Board of Elections website.",
+          "By visiting a courthouse post office to check a physical printed booklet.",
+          "By casting a provisional test ballot on a mock simulation application."
+        ],
+        correct: 1,
+        explanation: "Every state/precinct maintains an electronic registry. Checking through your official local Board of Elections site is the most secure and instant verification mechanism."
+      },
+      {
+        question: "Who is legally allowed to assist a voter who has a disability or language barrier inside the voting booth?",
+        options: [
+          "Only designated election station directors.",
+          "No one is permitted due to strict private ballot regulations.",
+          "Any person chosen by the voter, excluding their employer, representative of their employer, or union official.",
+          "Any passing stranger waiting in the outer registration line."
+        ],
+        correct: 2,
+        explanation: "To safeguard independence, federal voting rights allow voters needing assistance to bring a trusted friend, family member, or interpreter, provided they are not the voter's employer or union rep."
+      },
+      {
+        question: "What is an 'Absentee Ballot' (also referred to as Mail-In Voting)?",
+        options: [
+          "A fake training sheet designed for school kids.",
+          "A ballot completed and mailed in by a voter who cannot physically attend standard polling places.",
+          "A ballot that has been forgotten by the polling officers at closing times.",
+          "An electronic submission sent via personal secure email accounts."
+        ],
+        correct: 1,
+        explanation: "Absentee/mail-in voting enables individuals to receive, mark, and submit their ballot securely via mail or special dropboxes if they are away from home, working, or physically impaired."
+      },
+      {
+        question: "Why do election officials in many democratic nations mark a voter's finger with semi-permanent ink after voting?",
+        options: [
+          "To show that the voter is eligible for specific retail and shopping discounts.",
+          "To track voter demographics and verify age groups through scan lines.",
+          "To prevent double-voting by visually identifying individuals who have already cast ballots.",
+          "Simply as a decorative artistic token of participation."
+        ],
+        correct: 2,
+        explanation: "In many nations, indelible ink marked on a finger is an effective, visible check to ensure no individual tries to return to a polling place to cast multiple ballots."
+      },
+      {
+        question: "What is the primary role of non-partisan voter guides, such as VOTE411 or League of Women Voters guides?",
+        options: [
+          "To endorse specific candidates who align with business interests.",
+          "To explain policy platforms, candidate positions, and ballot measures in an unbiased, factual way.",
+          "To raise capital donations for major national political parties.",
+          "To schedule free shuttle transportation services for target demographics."
+        ],
+        correct: 1,
+        explanation: "Non-partisan guides are dedicated purely to objective voter education. They present candidate profiles and ballot arguments side-by-side using the candidates' own words without endorsements."
+      }
+    ];
+
+    // FAQ Accordion Data
+    const FAQ_DATA = [
+      {
+        id: "faq-1",
+        category: "reg",
+        question: "How do I check if I am registered to vote?",
+        answer: "You can instantly verify your active registration status by visiting your state's official Secretary of State website or the regional Board of Elections portal. These portals require your full name, date of birth, and registered address to show your precinct and registration status. Non-partisan sites like Vote.org can also guide you directly to the correct database."
+      },
+      {
+        id: "faq-2",
+        category: "reg",
+        question: "What documents do I need to register to vote?",
+        answer: "To register, you typically need to prove citizenship, age, and residency. Most jurisdictions accept a State Driver's License number, State Identification Card, or the last four digits of your Social Security Number (SSN). If submitting via paper mail-in, you might need to attach copies of utility bills, bank statements, or paycheck stubs clearly showing your current residential address."
+      },
+      {
+        id: "faq-3",
+        category: "reg",
+        question: "Can I register to vote on Election Day?",
+        answer: "This depends on regional laws. Many states permit 'Same-Day Voter Registration' (SDR), enabling eligible residents to register and immediately cast a provisional ballot on Election Day at their polling station. However, you must present a valid government-issued ID and an official document validating your current address. Check local regulations to see if same-day registration is active."
+      },
+      {
+        id: "faq-4",
+        category: "process",
+        question: "What happens if I go to the wrong polling place?",
+        answer: "If you arrive at the incorrect polling location, your name will not appear on the official voter roster. Polling workers will attempt to locate your correct designated site. If you choose to cast a ballot at the wrong location, you may be issued a 'Provisional Ballot'. However, some jurisdictions do not count provisional ballots cast in the incorrect precinct. It is always best to double-check your designated site online."
+      },
+      {
+        id: "faq-5",
+        category: "process",
+        question: "What is a 'Provisional Ballot' and when is it used?",
+        answer: "A provisional ballot is a safeguard for voters whose eligibility is in question on polling day (e.g., your name is missing from the roster, you lack required ID, or you are flagged as already having voted). The provisional ballot is sealed in an envelope and set aside. After Election Day, election officials research your registration and count the ballot once eligibility is confirmed."
+      },
+      {
+        id: "faq-6",
+        category: "security",
+        question: "How are mail-in ballots verified to ensure security?",
+        answer: "Mail-in ballots undergo a rigorous, multi-step verification process to prevent fraud. Each ballot envelope must be signed by the voter. Election workers (often in bi-partisan teams) compare the signature on the envelope with the voter signature on file. Many locations also print unique tracking barcodes on every ballot envelope, allowing voters to track their ballot from creation to final scan."
+      },
+      {
+        id: "faq-7",
+        category: "security",
+        question: "What happens during a recount and how are votes audited?",
+        answer: "Audits and recounts are critical components of election security. An audit typically involves randomly selecting a small percentage of paper ballots and hand-counting them to verify that optical scanner tallies match exactly. A full recount is triggered either automatically (if the margin of victory is extremely thin, such as under 0.5%) or upon petition, where ballots are re-processed or hand-tallied to ensure accurate tallies."
+      },
+      {
+        id: "faq-8",
+        category: "security",
+        question: "What are my rights if I face voter intimidation or issues?",
+        answer: "You are legally protected from intimidation, harassment, or interference at polling stations. Under federal law, no person may threaten, coerce, or intimidate you to influence your vote. If you encounter aggressive campaigning inside election zone boundaries (typically 100 feet from entrance), voter challenges, or interference, notify a polling manager immediately or contact the non-partisan Election Protection Hotline at 1-866-OUR-VOTE."
+      }
+    ];
+
+    // ==========================================
+    // STATE VARIABLES
+    // ==========================================
+    let currentStep = 0;
+    let countdownInterval = null;
+    let selectedMilestoneKey = "reg";
+
+    // Quiz State
+    let quizActive = false;
+    let quizCurrentIndex = 0;
+    let quizScore = 0;
+    let quizSelectedOption = null;
+
+    // Simulator State (Initial values matching 150 total votes)
+    let simulatorVotes = [50, 50, 50]; 
+
+    // FAQ Search & Filter State
+    let faqActiveCategory = "all";
+    let faqSearchQuery = "";
+
+    // Mobile Menu Toggle
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // Close mobile menu when a link is clicked
+    document.querySelectorAll('#mobile-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.add('hidden');
+      });
+    });
+
+
+    // ==========================================
+    // MODULE 1: JOURNEY STEPPER LOGIC
+    // ==========================================
+
+    function initJourney() {
+      setJourneyStep(0);
+      updateJourneyBadge();
+    }
+
+    function setJourneyStep(stepIndex) {
+      currentStep = stepIndex;
+      const stage = STEPPER_STAGES[currentStep];
+
+      // Update Node classes in visual tracker
+      const buttons = document.querySelectorAll('.stepper-node-btn');
+      buttons.forEach((btn, idx) => {
+        const iconDiv = btn.querySelector('.stepper-node-icon');
+        const titleSpan = btn.querySelector('.stepper-node-title');
+        const nameSpan = btn.querySelector('span:last-child');
+
+        if (idx < currentStep) {
+          // Completed steps
+          iconDiv.className = "stepper-node-icon w-12 h-12 rounded-2xl bg-brand-600 border-2 border-brand-500 text-white flex items-center justify-center font-display font-extrabold text-lg shadow-lg shadow-brand-500/10 transition-all duration-300";
+          iconDiv.innerHTML = `<svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>`;
+          titleSpan.className = "stepper-node-title block text-xs font-semibold tracking-wider text-brand-400 uppercase";
+          nameSpan.className = "block text-sm font-bold text-slate-200 leading-tight";
+        } else if (idx === currentStep) {
+          // Active step
+          iconDiv.className = "stepper-node-icon w-12 h-12 rounded-2xl bg-brand-600 border-2 border-brand-400 text-white flex items-center justify-center font-display font-extrabold text-lg shadow-lg shadow-brand-500/35 scale-110 ring-4 ring-brand-500/20 transition-all duration-300";
+          iconDiv.textContent = idx + 1;
+          titleSpan.className = "stepper-node-title block text-xs font-semibold tracking-wider text-brand-300 uppercase";
+          nameSpan.className = "block text-sm font-bold text-white leading-tight";
+        } else {
+          // Future steps
+          iconDiv.className = "stepper-node-icon w-12 h-12 rounded-2xl bg-slate-900 border-2 border-slate-800 text-slate-500 flex items-center justify-center font-display font-extrabold text-lg transition-all duration-300";
+          iconDiv.textContent = idx + 1;
+          titleSpan.className = "stepper-node-title block text-xs font-semibold tracking-wider text-slate-500 uppercase";
+          nameSpan.className = "block text-sm font-bold text-slate-500 leading-tight";
+        }
+      });
+
+      // Update Desktop progress line width
+      const desktopLine = document.getElementById('desktop-progress-line');
+      const progressPercent = (currentStep / (STEPPER_STAGES.length - 1)) * 100;
+      desktopLine.style.width = `${progressPercent}%`;
+
+      // Update detail card layout
+      const card = document.getElementById('step-detail-card');
+      card.classList.remove('animate-fade-in');
+      void card.offsetWidth; // Trigger reflow for animation restart
+      card.classList.add('animate-fade-in');
+
+      // Inject data
+      document.getElementById('step-badge-icon').innerHTML = stage.icon;
+      document.getElementById('step-stage-label').textContent = stage.label;
+      document.getElementById('step-stage-title').textContent = stage.title;
+      document.getElementById('step-stage-description').textContent = stage.description;
+      document.getElementById('step-stage-tip').textContent = stage.tip;
+
+      // Render Checklists
+      renderChecklist(stage);
+
+      // Disable/Enable Nav buttons
+      document.getElementById('step-prev-btn').disabled = (currentStep === 0);
+      document.getElementById('step-prev-btn').style.opacity = (currentStep === 0) ? "0.5" : "1";
+      document.getElementById('step-prev-btn').style.cursor = (currentStep === 0) ? "not-allowed" : "pointer";
+
+      document.getElementById('step-next-btn').disabled = (currentStep === STEPPER_STAGES.length - 1);
+      document.getElementById('step-next-btn').style.opacity = (currentStep === STEPPER_STAGES.length - 1) ? "0.5" : "1";
+      document.getElementById('step-next-btn').style.cursor = (currentStep === STEPPER_STAGES.length - 1) ? "not-allowed" : "pointer";
+    }
+
+    function renderChecklist(stage) {
+      const container = document.getElementById('step-checklist-container');
+      container.innerHTML = "";
+
+      stage.checklist.forEach((itemText, idx) => {
+        const checked = stage.states[idx];
+        const itemDiv = document.createElement('div');
+        itemDiv.className = "flex items-start space-x-3 p-2 hover:bg-slate-900/30 rounded-lg transition-colors cursor-pointer";
+        itemDiv.onclick = () => toggleChecklistItem(idx);
+
+        itemDiv.innerHTML = `
+          <button class="mt-0.5 w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-all ${
+            checked 
+              ? 'bg-accent-emerald border-accent-emerald text-white' 
+              : 'border-slate-700 bg-slate-950/60 text-transparent hover:border-slate-500'
+          }">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </button>
+          <span class="text-xs font-medium transition-colors ${checked ? 'text-slate-400 line-through' : 'text-slate-300'}">${itemText}</span>
+        `;
+
+        container.appendChild(itemDiv);
+      });
+
+      // Calculate progress of this step
+      const checkedCount = stage.states.filter(v => v === true).length;
+      const stepPercent = Math.round((checkedCount / stage.states.length) * 100);
+      
+      document.getElementById('step-completion-percentage').textContent = `${stepPercent}%`;
+      document.getElementById('step-completion-bar').style.width = `${stepPercent}%`;
+
+      // Update badge status
+      const statusBadge = document.getElementById('step-card-status');
+      if (stepPercent === 100) {
+        statusBadge.textContent = "Ready";
+        statusBadge.className = "px-3 py-1 rounded-full text-xs font-semibold bg-accent-emerald/10 text-accent-emerald border border-accent-emerald/20";
+      } else if (stepPercent > 0) {
+        statusBadge.textContent = "Preparing";
+        statusBadge.className = "px-3 py-1 rounded-full text-xs font-semibold bg-accent-amber/10 text-accent-amber border border-accent-amber/20";
+      } else {
+        statusBadge.textContent = "Unprepared";
+        statusBadge.className = "px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20";
+      }
+    }
+
+    function toggleChecklistItem(itemIndex) {
+      const stage = STEPPER_STAGES[currentStep];
+      stage.states[itemIndex] = !stage.states[itemIndex];
+      renderChecklist(stage);
+      updateJourneyBadge();
+    }
+
+    function updateJourneyBadge() {
+      // Calculate how many stages are 100% prepared
+      let readyCount = 0;
+      STEPPER_STAGES.forEach(stage => {
+        const checkedCount = stage.states.filter(v => v === true).length;
+        if (checkedCount === stage.states.length) {
+          readyCount++;
+        }
+      });
+
+      const badge = document.getElementById('journey-completion-badge');
+      badge.textContent = `${readyCount}/6 Steps Ready`;
+      if (readyCount === 6) {
+        badge.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-accent-emerald/15 text-accent-emerald border border-accent-emerald/30";
+      } else if (readyCount > 0) {
+        badge.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-accent-amber/15 text-accent-amber border border-accent-amber/30";
+      } else {
+        badge.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30";
+      }
+    }
+
+    function journeyNext() {
+      if (currentStep < STEPPER_STAGES.length - 1) {
+        setJourneyStep(currentStep + 1);
+      }
+    }
+
+    function journeyPrev() {
+      if (currentStep > 0) {
+        setJourneyStep(currentStep - 1);
+      }
+    }
+
+
+    // ==========================================
+    // MODULE 2: COUNTDOWN TIMER LOGIC
+    // ==========================================
+
+    function changeMilestone() {
+      selectedMilestoneKey = document.getElementById('milestone-selector').value;
+      const data = MILESTONES[selectedMilestoneKey];
+
+      // Update info cards
+      document.getElementById('milestone-info-title').textContent = data.title;
+      document.getElementById('milestone-info-desc').textContent = data.desc;
+      document.getElementById('milestone-target-date').textContent = data.dateString;
+
+      startCountdown(data.target);
+    }
+
+    function startCountdown(targetISOString) {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
+
+      const targetDate = new Date(targetISOString).getTime();
+
+      function updateCounter() {
+        const now = new Date().getTime();
+        const difference = targetDate - now;
+
+        if (difference <= 0) {
+          clearInterval(countdownInterval);
+          document.getElementById('countdown-days').textContent = "00";
+          document.getElementById('countdown-hours').textContent = "00";
+          document.getElementById('countdown-minutes').textContent = "00";
+          document.getElementById('countdown-seconds').textContent = "00";
+          
+          document.getElementById('countdown-active-banner').classList.add('hidden');
+          document.getElementById('countdown-passed-banner').classList.remove('hidden');
+          return;
+        }
+
+        document.getElementById('countdown-active-banner').classList.remove('hidden');
+        document.getElementById('countdown-passed-banner').classList.add('hidden');
+
+        // Math calculations
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        // Render values padded with zero
+        document.getElementById('countdown-days').textContent = String(days).padStart(2, '0');
+        document.getElementById('countdown-hours').textContent = String(hours).padStart(2, '0');
+        document.getElementById('countdown-minutes').textContent = String(minutes).padStart(2, '0');
+        document.getElementById('countdown-seconds').textContent = String(seconds).padStart(2, '0');
+      }
+
+      updateCounter();
+      countdownInterval = setInterval(updateCounter, 1000);
+    }
+
+
+    // ==========================================
+    // MODULE 3: INTERACTIVE AWARENESS QUIZ
+    // ==========================================
+
+    function startQuiz() {
+      document.getElementById('quiz-start-state').classList.add('hidden');
+      document.getElementById('quiz-active-state').classList.remove('hidden');
+      document.getElementById('quiz-end-state').classList.add('hidden');
+
+      quizCurrentIndex = 0;
+      quizScore = 0;
+      quizActive = true;
+      loadQuizQuestion();
+    }
+
+    function loadQuizQuestion() {
+      const q = QUIZ_QUESTIONS[quizCurrentIndex];
+      quizSelectedOption = null;
+
+      // Update indicators
+      document.getElementById('quiz-progress-text').textContent = `Question ${quizCurrentIndex + 1} of 10`;
+      document.getElementById('quiz-score-badge').textContent = `Score: ${quizScore}/10`;
+      
+      const percent = ((quizCurrentIndex + 1) / QUIZ_QUESTIONS.length) * 100;
+      document.getElementById('quiz-progress-bar').style.width = `${percent}%`;
+
+      document.getElementById('quiz-question-text').textContent = q.question;
+
+      // Clear & Load options
+      const container = document.getElementById('quiz-options-container');
+      container.innerHTML = "";
+
+      q.options.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "quiz-opt-btn w-full bg-slate-900/60 border border-slate-800 hover:border-slate-700 p-4 rounded-2xl flex items-center justify-between text-left text-sm font-semibold transition-all hover:translate-x-1 focus:outline-none";
+        btn.onclick = () => selectQuizOption(idx, btn);
+
+        btn.innerHTML = `
+          <span class="pr-4 text-slate-200">${optText}</span>
+          <div class="opt-check-indicator w-5 h-5 rounded-full border border-slate-700 flex items-center justify-center shrink-0"></div>
+        `;
+        container.appendChild(btn);
+      });
+
+      // Hide Explanation card and disable Next button
+      const explanation = document.getElementById('quiz-explanation-card');
+      explanation.className = "hidden bg-slate-900/80 border rounded-2xl p-5 mb-6 transform scale-95 opacity-0 transition-all duration-300";
+
+      const actionBtn = document.getElementById('quiz-action-btn');
+      actionBtn.disabled = true;
+      actionBtn.className = "px-6 py-3 bg-slate-800 text-slate-500 cursor-not-allowed font-semibold rounded-xl text-sm transition-all flex items-center gap-2";
+      actionBtn.textContent = (quizCurrentIndex === QUIZ_QUESTIONS.length - 1) ? "View Summary Score" : "Next Question";
+    }
+
+    function selectQuizOption(optionIdx, buttonEl) {
+      if (quizSelectedOption !== null) return; // Prevent double select
+
+      quizSelectedOption = optionIdx;
+      const q = QUIZ_QUESTIONS[quizCurrentIndex];
+      const isCorrect = (optionIdx === q.correct);
+
+      if (isCorrect) {
+        quizScore++;
+      }
+
+      // Highlight options
+      const buttons = document.querySelectorAll('.quiz-opt-btn');
+      buttons.forEach((btn, idx) => {
+        btn.onclick = null; // Disable clicking
+        btn.style.cursor = "default";
+        btn.classList.remove('hover:translate-x-1');
+
+        const indicator = btn.querySelector('.opt-check-indicator');
+
+        if (idx === q.correct) {
+          // Correct answer gets styled green
+          btn.className = "w-full bg-accent-emerald/10 border-accent-emerald/80 p-4 rounded-2xl flex items-center justify-between text-left text-sm font-semibold text-white focus:outline-none border-2";
+          indicator.className = "w-5 h-5 rounded-full bg-accent-emerald text-white flex items-center justify-center shrink-0";
+          indicator.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>`;
+        } else if (idx === optionIdx) {
+          // Incorrect selected gets styled red
+          btn.className = "w-full bg-accent-rose/10 border-accent-rose/80 p-4 rounded-2xl flex items-center justify-between text-left text-sm font-semibold text-white focus:outline-none border-2";
+          indicator.className = "w-5 h-5 rounded-full bg-accent-rose text-white flex items-center justify-center shrink-0";
+          indicator.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>`;
+        } else {
+          // Unselected neutral gets dimmed
+          btn.className = "w-full bg-slate-950/20 border border-slate-900 p-4 rounded-2xl flex items-center justify-between text-left text-sm font-semibold text-slate-600 focus:outline-none";
+          indicator.className = "w-5 h-5 rounded-full border border-slate-900 flex items-center justify-center shrink-0";
+        }
+      });
+
+      // Display explanation card
+      const explanation = document.getElementById('quiz-explanation-card');
+      const expIcon = document.getElementById('quiz-explanation-icon');
+      const expTitle = document.getElementById('quiz-explanation-title');
+      const expBody = document.getElementById('quiz-explanation-body');
+
+      explanation.classList.remove('hidden');
+      // Trigger transition reflow
+      void explanation.offsetHeight;
+
+      if (isCorrect) {
+        explanation.className = "bg-accent-emerald/5 border-accent-emerald/20 rounded-2xl p-5 mb-6 transform scale-100 opacity-100 transition-all duration-300 flex items-start space-x-3";
+        expIcon.className = "mt-0.5 w-6 h-6 rounded-full bg-accent-emerald/10 text-accent-emerald flex items-center justify-center shrink-0 border border-accent-emerald/20";
+        expIcon.innerHTML = `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>`;
+        expTitle.textContent = "Correct Selection!";
+        expTitle.className = "font-bold text-sm text-accent-emerald";
+      } else {
+        explanation.className = "bg-accent-rose/5 border-accent-rose/20 rounded-2xl p-5 mb-6 transform scale-100 opacity-100 transition-all duration-300 flex items-start space-x-3";
+        expIcon.className = "mt-0.5 w-6 h-6 rounded-full bg-accent-rose/10 text-accent-rose flex items-center justify-center shrink-0 border border-accent-rose/20";
+        expIcon.innerHTML = `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>`;
+        expTitle.textContent = "Incorrect Selection";
+        expTitle.className = "font-bold text-sm text-accent-rose";
+      }
+
+      expBody.textContent = q.explanation;
+
+      // Enable Action Button
+      const actionBtn = document.getElementById('quiz-action-btn');
+      actionBtn.disabled = false;
+      actionBtn.className = "px-6 py-3 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl text-sm transition-all flex items-center gap-2 shadow-lg shadow-brand-500/10 cursor-pointer";
+    }
+
+    function nextQuizQuestion() {
+      if (quizCurrentIndex < QUIZ_QUESTIONS.length - 1) {
+        quizCurrentIndex++;
+        loadQuizQuestion();
+      } else {
+        showQuizResults();
+      }
+    }
+
+    function showQuizResults() {
+      document.getElementById('quiz-active-state').classList.add('hidden');
+      document.getElementById('quiz-end-state').classList.remove('hidden');
+
+      const percent = (quizScore / QUIZ_QUESTIONS.length) * 100;
+      document.getElementById('quiz-result-score').textContent = `${percent}%`;
+
+      // Set score stats
+      document.getElementById('quiz-correct-count').textContent = quizScore;
+      document.getElementById('quiz-incorrect-count').textContent = QUIZ_QUESTIONS.length - quizScore;
+
+      // Radial Ring Animation
+      const ring = document.getElementById('quiz-result-ring');
+      const circumference = 2 * Math.PI * 48; // r=48 -> ~301.59
+      const offset = circumference - (quizScore / QUIZ_QUESTIONS.length) * circumference;
+      ring.style.strokeDasharray = `${circumference}`;
+      
+      // Delay so it animates
+      setTimeout(() => {
+        ring.style.strokeDashoffset = `${offset}`;
+      }, 100);
+
+      // Determine profile rating
+      const title = document.getElementById('quiz-result-title');
+      const desc = document.getElementById('quiz-result-desc');
+
+      if (quizScore === 10) {
+        title.textContent = "Elite Ambassador! 🏆";
+        title.className = "font-display font-extrabold text-2xl bg-gradient-to-r from-yellow-400 to-amber-300 bg-clip-text text-transparent";
+        desc.textContent = "Outstanding score! You successfully answered all questions perfectly. You possess complete mastery of democratic procedures and voter awareness guidelines.";
+        triggerConfettiShower();
+      } else if (quizScore >= 8) {
+        title.textContent = "Civic Champion! 🎖️";
+        title.className = "font-display font-bold text-2xl text-accent-emerald";
+        desc.textContent = "Fantastic result! You scored extremely highly, displaying deep civic awareness. You are thoroughly prepared to cast an informed ballot.";
+        triggerConfettiShower();
+      } else if (quizScore >= 5) {
+        title.textContent = "Informed Citizen 🗳️";
+        title.className = "font-display font-bold text-2xl text-brand-300";
+        desc.textContent = "Good score! You have a solid grasp of core voting mechanics. Read over the FAQ resources below to secure absolute confidence.";
+      } else {
+        title.textContent = "Novice Voter 🌱";
+        title.className = "font-display font-bold text-2xl text-accent-amber";
+        desc.textContent = "A valuable learning attempt. Elections feature complex mechanisms. Spend some time reviewing our Stepper and FAQ database before trying the quiz again!";
+      }
+    }
+
+    function resetQuiz() {
+      startQuiz();
+    }
+
+
+    // ==========================================
+    // CANVAS CONFETTI CELEBRATION
+    // ==========================================
+    let confettiParticles = [];
+    let confettiAnimationId = null;
+
+    function triggerConfettiShower() {
+      const canvas = document.getElementById('quiz-confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Set canvas size matching container
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+
+      // Populate particles
+      confettiParticles = [];
+      const colors = ['#4f5eff', '#8b5cf6', '#10b981', '#f59e0b', '#f43f5e', '#ffffff'];
+
+      for (let i = 0; i < 120; i++) {
+        confettiParticles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * -50 - 20, // Start above viewport
+          r: Math.random() * 4 + 2,
+          d: Math.random() * canvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 5,
+          tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+          tiltAngle: 0,
+          speed: Math.random() * 3 + 2
+        });
+      }
+
+      if (confettiAnimationId) {
+        cancelAnimationFrame(confettiAnimationId);
+      }
+
+      function drawConfetti() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        let remaining = false;
+
+        confettiParticles.forEach(p => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += p.speed;
+          p.x += Math.sin(p.tiltAngle) * 0.5;
+          p.tilt = Math.sin(p.tiltAngle - (p.r / 2)) * 10;
+
+          if (p.y <= canvas.height) {
+            remaining = true;
+          }
+
+          ctx.beginPath();
+          ctx.lineWidth = p.r;
+          ctx.strokeStyle = p.color;
+          ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          ctx.stroke();
+        });
+
+        if (remaining) {
+          confettiAnimationId = requestAnimationFrame(drawConfetti);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+
+      drawConfetti();
+    }
+
+
+    // ==========================================
+    // MODULE 4: FAQ KNOWLEDGE ACCORDION
+    // ==========================================
+
+    function initFAQs() {
+      renderFAQs();
+    }
+
+    function renderFAQs() {
+      const container = document.getElementById('faq-accordion-container');
+      container.innerHTML = "";
+
+      // Filter by Category and Search terms
+      const filtered = FAQ_DATA.filter(faq => {
+        const categoryMatch = (faqActiveCategory === "all" || faq.category === faqActiveCategory);
+        
+        let searchMatch = true;
+        if (faqSearchQuery) {
+          const q = faqSearchQuery.toLowerCase();
+          searchMatch = (faq.question.toLowerCase().includes(q) || faq.answer.toLowerCase().includes(q));
+        }
+
+        return (categoryMatch && searchMatch);
+      });
+
+      if (filtered.length === 0) {
+        container.classList.add('hidden');
+        document.getElementById('faq-no-results').classList.remove('hidden');
+        return;
+      }
+
+      container.classList.remove('hidden');
+      document.getElementById('faq-no-results').classList.add('hidden');
+
+      filtered.forEach((faq, index) => {
+        const accordionDiv = document.createElement('div');
+        accordionDiv.className = "bg-[#0f1524]/60 border border-slate-800/80 rounded-2xl overflow-hidden transition-all shadow-md";
+        accordionDiv.id = `accordion-item-${faq.id}`;
+
+        // Get highlighted strings if search query is active
+        const highlightedQuestion = highlightText(faq.question, faqSearchQuery);
+        const highlightedAnswer = highlightText(faq.answer, faqSearchQuery);
+
+        accordionDiv.innerHTML = `
+          <button onclick="toggleFAQ('${faq.id}')" class="w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none group">
+            <h4 class="font-display font-bold text-sm text-slate-200 group-hover:text-white transition-colors">
+              ${highlightedQuestion}
+            </h4>
+            <div class="faq-chevron-icon w-6 h-6 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 ml-4 group-hover:border-slate-700 transition-all">
+              <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-200 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </button>
+          <div class="faq-body-panel max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+            <div class="px-6 pb-6 pt-1 border-t border-slate-800/60 text-xs text-slate-400 leading-relaxed space-y-3">
+              <p>${highlightedAnswer}</p>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(accordionDiv);
+      });
+    }
+
+    function highlightText(text, searchStr) {
+      if (!searchStr) return text;
+      
+      // Escape special regex chars
+      const escaped = searchStr.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const regex = new RegExp(`(${escaped})`, 'gi');
+      
+      // Highlight exact occurrences
+      return text.replace(regex, '<mark class="search-highlight">$1</mark>');
+    }
+
+    function filterFAQCategory(categoryKey) {
+      faqActiveCategory = categoryKey;
+
+      // Update button classes
+      const buttons = document.querySelectorAll('.faq-category-btn');
+      buttons.forEach(btn => {
+        btn.className = "faq-category-btn px-4 py-2 rounded-xl text-xs font-semibold border border-slate-800 bg-slate-900/40 text-slate-400 hover:text-white transition-all";
+      });
+
+      const activeBtn = document.getElementById(`faq-tab-${categoryKey}`);
+      activeBtn.className = "faq-category-btn px-4 py-2 rounded-xl text-xs font-semibold border border-brand-500 bg-brand-500/10 text-brand-300 transition-all";
+
+      renderFAQs();
+    }
+
+    function filterFAQs() {
+      const input = document.getElementById('faq-search-input');
+      faqSearchQuery = input.value.trim();
+
+      // Show clear button
+      const clearBtn = document.getElementById('faq-clear-btn');
+      if (faqSearchQuery.length > 0) {
+        clearBtn.classList.remove('hidden');
+        clearBtn.classList.add('flex');
+      } else {
+        clearBtn.classList.add('hidden');
+        clearBtn.classList.remove('flex');
+      }
+
+      renderFAQs();
+    }
+
+    function clearFAQSearch() {
+      const input = document.getElementById('faq-search-input');
+      input.value = "";
+      faqSearchQuery = "";
+      document.getElementById('faq-clear-btn').classList.add('hidden');
+      renderFAQs();
+    }
+
+    function toggleFAQ(faqId) {
+      const el = document.getElementById(`accordion-item-${faqId}`);
+      const body = el.querySelector('.faq-body-panel');
+      const icon = el.querySelector('.faq-chevron-icon svg');
+
+      const isOpened = (body.style.maxHeight !== "" && body.style.maxHeight !== "0px");
+
+      // Close all other panels for elegant accordion feel
+      const allPanels = document.querySelectorAll('.faq-body-panel');
+      const allIcons = document.querySelectorAll('.faq-chevron-icon svg');
+      const allContainers = document.querySelectorAll('#faq-accordion-container > div');
+
+      allPanels.forEach(p => p.style.maxHeight = "0px");
+      allIcons.forEach(i => i.style.transform = "rotate(0deg)");
+      allContainers.forEach(c => {
+        c.classList.remove('border-brand-500/40');
+        c.classList.remove('bg-slate-900/40');
+      });
+
+      if (!isOpened) {
+        body.style.maxHeight = `${body.scrollHeight}px`;
+        icon.style.transform = "rotate(180deg)";
+        el.classList.add('border-brand-500/40');
+        el.classList.add('bg-slate-900/40');
+      }
+    }
+
+
+    // ==========================================
+    // MODULE 5: MOCK VOTING SIMULATOR
+    // ==========================================
+
+    function initSimulator() {
+      updateSimulatorUI();
+    }
+
+    function castSimulatorVote(candidateIdx) {
+      // Tally increments
+      simulatorVotes[candidateIdx]++;
+
+      // Get candidate details
+      const candNames = ["Ava Sterling", "Marcus Chen", "Elena Vance"];
+      const candidateName = candNames[candidateIdx];
+
+      // Visual feedback card glow effect
+      const card = document.getElementById(`sim-card-${candidateIdx}`);
+      if (card) {
+        let borderClass = 'border-brand-500';
+        let glowClass = 'shadow-brand-500/30';
+        if (candidateIdx === 0) {
+          borderClass = 'border-accent-violet';
+          glowClass = 'shadow-accent-violet/30';
+        } else if (candidateIdx === 2) {
+          borderClass = 'border-accent-emerald';
+          glowClass = 'shadow-accent-emerald/30';
+        }
+
+        card.classList.add(borderClass, glowClass);
+        setTimeout(() => {
+          card.classList.remove(borderClass, glowClass);
+        }, 800);
+      }
+
+      // Visual Ballot Dropdown animation
+      const ballotSlot = document.getElementById('visual-ballot-slot');
+      const ballotName = document.getElementById('visual-ballot-candidate');
+
+      ballotName.textContent = candidateName;
+      
+      // Clear anim states
+      ballotSlot.classList.add('hidden');
+      void ballotSlot.offsetWidth; // trigger reflow
+      ballotSlot.classList.remove('hidden');
+
+      // Update Tally Dashboard
+      updateSimulatorUI();
+    }
+
+    function updateSimulatorUI() {
+      const candNames = ["Ava Sterling", "Marcus Chen", "Elena Vance"];
+      
+      // Calculate totals
+      const totalVotes = simulatorVotes.reduce((sum, v) => sum + v, 0);
+      document.getElementById('sim-total-count').textContent = totalVotes;
+
+      // Update candidates progress
+      simulatorVotes.forEach((votes, idx) => {
+        const percent = totalVotes === 0 ? 0 : ((votes / totalVotes) * 100).toFixed(1);
+        
+        document.getElementById(`sim-cand${idx}-votes`).textContent = votes;
+        document.getElementById(`sim-cand${idx}-percent`).textContent = `${percent}%`;
+        document.getElementById(`sim-cand${idx}-bar`).style.width = `${percent}%`;
+      });
+    }
+
+    function resetSimulator() {
+      // Reset back to equal representation
+      simulatorVotes = [50, 50, 50];
+      updateSimulatorUI();
+    }
+
+
+    // ==========================================
+    // SYSTEM INITIALIZER
+    // ==========================================
+    window.addEventListener('DOMContentLoaded', () => {
+      initJourney();
+      
+      // Default to "Voter Registration Deadline"
+      changeMilestone();
+
+      // Load FAQs
+      initFAQs();
+
+      // Load Simulator
+      initSimulator();
+    });
+
+  </script>
+</body>
+</html>
