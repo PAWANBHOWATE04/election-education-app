@@ -93,7 +93,26 @@ Since this is a lightweight, zero-dependency client-side portal, **no installati
 
 > [!TIP]
 > **Deployment Status**: As a single-page HTML web application, this project is fully compatible with immediate, zero-config deployment on platforms such as **GitHub Pages**, **Vercel**, **Netlify**, or **Cloudflare Pages**. 
-> * [Live Preview Link] (Placeholder)
+> * **Live Preview**: [DemocracyHub Live](https://election-education-app-gray.vercel.app/)
+
+---
+
+## 📸 Screenshots
+
+### Homepage
+![Homepage](screenshots/homepage.png)
+
+### Election Deadlines Tracker
+![Deadlines Tracker](screenshots/deadlines.png)
+
+### Mock Voting Simulator
+![Voting Simulator](screenshots/voting-simulator.png)
+
+### Civic Awareness Quiz
+![Quiz](screenshots/quiz.png)
+
+### Mobile Responsive View
+![Mobile View](screenshots/mobile-view.png)
 
 ---
 
